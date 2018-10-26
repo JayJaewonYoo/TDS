@@ -1,0 +1,9 @@
+X
+xor 3 4
+X1 simple 1 1
+X2 simple 0 0
+X3 simple 0 0
+1 1 X1 alpha 1 X2
+1 1 X2 beta  1 X3
+1 1 X3 alpha 1 X1
+1 1 X3 beta  1 X1

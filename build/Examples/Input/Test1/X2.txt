@@ -1,0 +1,6 @@
+X2 
+xor  2 2
+D simple 1 1
+E simple 0 0
+1 1 D beta 0 E
+1 1 E sigma 1 D
