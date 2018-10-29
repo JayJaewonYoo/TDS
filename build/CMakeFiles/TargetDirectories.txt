@@ -1,0 +1,3 @@
+/home/sadegh/Desktop/TDSgit/TDS/build/CMakeFiles/rebuild_cache.dir
+/home/sadegh/Desktop/TDSgit/TDS/build/CMakeFiles/TDS.dir
+/home/sadegh/Desktop/TDSgit/TDS/build/CMakeFiles/edit_cache.dir
