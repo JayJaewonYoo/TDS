@@ -21,6 +21,46 @@ enum class DEStype{SIMPLE, XOR, SYNC};
 
 
 class DES{
+public:
+    //constructors
+    DES();
+    DES(string _name);
+    DES(string _name, DES* _parent, int noc);
+    DES(string _name, DES* _parent, int noc, int _fddState);
+
+    void setfddState(int i);
+    int getfddState();
+
+    string getName()const;
+    virtual string printName()const;
+    virtual int getCompSize();
+    virtual DEStype getType()const = 0;
+
+    void setPar(DES* _parent);
+    DES* getPar();
+    void setAddPred(bdd P);
+    bdd  getAddPred();
+
+
+
+    virtual void setfddDomain(int i);
+    virtual int getfddDomain();
+    virtual DES* addComponent(DES* T);
+    virtual void addEvent(event* sigma);
+    virtual void addDelta(delta* d);
+    virtual bdd theta(DES* G, bool source = false, event* sigma = nullptr);
+    virtual bdd initialPredicate();
+    virtual bdd markerPredicate();
+    virtual bool isInitial();
+    virtual bool isMarker();
+
+    virtual DES* findComponent(string _name);
+
+
+    // printing functions
+    virtual ostream& print(ostream& out)const = 0;
+    friend ostream& operator<<(ostream& out, const DES& T);
+
 protected:
     string name;
     DES* parent;//pointer to parent DES
@@ -29,198 +69,74 @@ protected:
     int fddDomain;//id of the assigned variable
     int fddState;//value of the parent variable
     bdd addPred;//bdd used for encoding the path to the root in a TDS
-
-public:
-    //constructors
-    DES(): name{""}, parent{nullptr}, addPred{bddtrue}{}
-    DES(string _name): name{_name}, parent{nullptr},
-        numOfComponents{0}, addPred{bddtrue}{}
-    DES(string _name, DES* _parent, int noc): name{_name},
-        parent{_parent}, numOfComponents{noc}, addPred{bddtrue}{}
-    DES(string _name, DES* _parent, int noc, int _fddState): name{_name},
-        parent{_parent}, numOfComponents{noc}, fddState{_fddState}{
-        if (_parent ==  nullptr)
-            addPred = bddtrue;
-        else if (_parent->getType() == DEStype::SYNC)
-            addPred = _parent->getAddPred();
-        else
-            addPred = _parent->getAddPred() &
-                    fdd_ithvar(_parent->getfddDomain(), _fddState);
-    }
-
-    void setPar(DES* _parent){parent = _parent;}
-    DES* getPar(){return parent;}
-    void setAddPred(bdd P){addPred = P;}
-    bdd  getAddPred(){return addPred;}
-
-    virtual void setfddDomain(int i){
-        cerr << "Error: setfddDomain  called on " << this->getName() << "!" << endl;
-        abort();
-    }
-    virtual int getfddDomain(){
-        cerr << "Error: getfddDomain  called on " << this->getName() << "!" << endl;
-        abort();
-    }
-
-    virtual bool isInitial(){
-        cerr << "Error: isInitial  called on " << this->getName() << "!" << endl;
-        abort();
-    }
-
-    virtual bool isMarker(){
-        cerr << "Error: isMarker  called on " << this->getName() << "!" << endl;
-        abort();
-    }
-    virtual void setfddState(int i){ fddState = i;}
-    int getfddState(){return fddState;}
-
-    string getName()const{return name;}
-    virtual string printName()const {return name;}
-    virtual DES* addComponent(DES* T){
-        cerr << "Error: addComponent called on " << this->getName() << "." << endl;
-        abort();
-    }
-    virtual void addEvent(event* sigma){
-        cerr << "Error: addEvent called on " << this->getName() << "." << endl;
-        abort();
-    }
-    virtual void addDelta(delta* d){
-        cerr << "Error: addDelta called on " << this->getName() << "." << endl;
-        abort();
-    }
-    virtual bdd theta(DES* G, bool source = false, event* sigma = nullptr){
-        cerr << "Error: theta called on " << this->getName() << "." << endl;
-        abort();
-    }
-    virtual DES* findComponent(string _name){
-        return nullptr;
-    }
-    virtual int getCompSize(){return 0;}
-    virtual DEStype getType()const = 0;
-    // printing functions
-    virtual ostream& print(ostream& out)const = 0;
-    friend ostream& operator<<(ostream& out, const DES& T) {return T.print(out);}
 };
+
 
 typedef unique_ptr<DES> DESPtr;
 class DESCmp{
 public:
-    bool operator()(const DESPtr& p1, const DESPtr& p2){
-        return p1->getName() < p2->getName();
-    }
+    bool operator()(const DESPtr& p1, const DESPtr& p2);
 };
 
 
 class simpleDES: public DES{
+public:
+    simpleDES(string _name, DES* _parent, int _fddState,
+              bool _initial = false, bool _marker = false);
+    bool isInitial();
+    bool isMarker();
+    string printName()const;
+    DEStype getType()const;
+    ostream& print(ostream& out) const;
 private:
     bool initial;// default = false,
     bool marker;// default  = false,
-public:
-//    simpleDES(string _name):DES(_name,nullptr, 0){}
-//    simpleDES(string _name, DES* _parent):DES(_name, _parent, 0){}
-    simpleDES(string _name, DES* _parent, int _fddState,
-              bool _initial = false, bool _marker = false)
-        :DES(_name, _parent, 0, _fddState),
-          initial{_initial}, marker{_marker} {}
-
-    bool isInitial(){return initial;}
-    bool isMarker(){return marker;}
-    string printName()const {
-        string retS = name;
-        if (marker) retS += "*";
-        if (initial) retS += "(i)";
-        return retS;
-    }
-    DEStype getType()const{return DEStype::SIMPLE;}
-    ostream& print(ostream& out) const;
 };
 
 
 class xorDES: public DES{
+public:
+    xorDES(string _name, DES* _parent, int noc, int _fddState);
+    DEStype getType()const;
+    void setfddDomain(int i);
+    int getfddDomain();
+    int getCompSize();
+    // adding components: if T is already in the compenent
+    //set, a pointer to T will be returned; otherwise
+    // a unique pointer of T is created and added to the component
+    //set and a pointer to this newly added component will
+    //be returned.
+    DES* addComponent(DES* T);
+    DES* findComponent(string G);
+    void addEvent(event* sigma);
+
+    void addDelta(delta* d);
+    bdd initialPredicate();
+    bdd markerPredicate();
+    //theta_G(q): if source == true, then primed variables are used to encode!
+    bdd theta(DES* G, bool source = false, event* sigma = nullptr);
+    // printting function: Prints components and transitions.
+    ostream& print(ostream& out) const;
 private:
     set<DESPtr, DESCmp> components;// set of components; they can be simple, xor, or sync DESs.
     set<event*> Sigma;// alphabet of event labels
     dPtr transitionStructure;// delta
-public:
-    xorDES(string _name, DES* _parent, int noc, int _fddState): DES(_name,_parent, noc, _fddState) {
-        // add new fdd variable
-        // fddDomain - 1 will be the primed variable
-        vector<int> temp{noc, noc};
-        fdd_extdomain(&temp[0], temp.size());
-        this->setfddDomain( fdd_domainnum() - 1);
-        fdd_hook_suorce.push_back(this->getName() + "'");
-        fdd_hook_suorce.push_back(this->getName());
-    }
-    DEStype getType()const{return DEStype::XOR;}
-    void setfddDomain(int i){ fddDomain = i;}
-    int getfddDomain(){return fddDomain;}
-    int getCompSize(){return components.size();}
-    // adding components: if T is already in the compenent set, a pointer to T will be returned; otherwise
-    // a unique pointer of T is created and added the component set and a pointer to this newly added component will
-    //be returned.
-    DES* addComponent(DES* T){
-        DESPtr temp(T);
-        auto it = components.insert(move(temp));
-        return it.first->get();
-    }
-    DES* findComponent(string G){
-        for(auto& c:components){
-            if( c->getName() == G)
-                return c.get();
-            else{
-                DES* comp = c->findComponent(G);
-                if(comp != nullptr)
-                    return comp;
-            }
-        }
-        return nullptr;
-    }
-    void addEvent(event* sigma){
-        Sigma.insert(sigma);
-        //check posssibility of checking local coupling???
-    }
-
-    void addDelta(delta* d){
-        transitionStructure.reset(d);
-    }
-    //theta_G(q): if source == true, then primed variables are used to encode!
-    bdd theta(DES* G, bool source = false, event* sigma = nullptr);
-
-    // printting function: Prints components and transitions.
-    ostream& print(ostream& out) const;
-private:
-
 };
 
 
 class syncDES: public DES{
+public:
+    syncDES(string _name, DES* _parent, int noc , int _fddState);
+
+    int getCompSize();
+    DES* addComponent(DES* T);
+    DES* findComponent(string G);
+    bdd initialPredicate();
+    bdd markerPredicate();
+    DEStype getType()const;
+    ostream& print(ostream& out) const;
 private:
     set<DESPtr, DESCmp> components;
-public:
-    syncDES(string _name, DES* _parent, int noc , int _fddState)
-        :DES(_name, _parent, noc, _fddState){}
-
-    int getCompSize(){return components.size();}
-    DES* addComponent(DES* T){
-        DESPtr temp(T);
-        auto it = components.insert(move(temp));
-        return it.first->get();
-    }
-    DES* findComponent(string G){
-        for(auto& c:components){
-            if( c->getName() == G)
-                return c.get();
-            else{
-                DES* comp = c->findComponent(G);
-                if(comp != nullptr)
-                    return comp;
-            }
-        }
-        return nullptr;
-    }
-    DEStype getType()const{return DEStype::SYNC;}
-    ostream& print(ostream& out) const;
-
 };
 
 #endif // DES_H
