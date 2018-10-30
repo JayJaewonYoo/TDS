@@ -7,7 +7,7 @@ Required tools:
  
  To build the project:
  1. Go to build directory.
- 2. Run cmake ..
- 3. Run make
+ 2. Run cmake .. .
+ 3. Run make.
 
 This project is currently under development. More information to come...
