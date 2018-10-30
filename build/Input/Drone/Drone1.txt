@@ -1,0 +1,20 @@
+Drone1
+xor 5   8
+Drone1Idle            simple 1 1        
+Drone1MovingUp        simple 0 0        
+Drone1MovingDown      simple 0 0        
+Drone1MovingLeft      simple 0 0        
+Drone1MovingRight     simple 0 0        
+1 1 Drone1Idle               startDrone1MovingUp       1 Drone1MovingUp
+1 1 Drone1MovingUp           doneDrone1MovingUp        0 Drone1Idle
+1 1 Drone1Idle               startDrone1MovingDown     1 Drone1MovingDown
+1 1 Drone1MovingDown         doneDrone1MovingDown      0 Drone1Idle
+1 1 Drone1Idle               startDrone1MovingLeft     1 Drone1MovingLeft
+1 1 Drone1MovingLeft         doneDrone1MovingLeft      0 Drone1Idle
+1 1 Drone1Idle               startDrone1MovingRight    1 Drone1MovingRight
+1 1 Drone1MovingRight        doneDrone1MovingRight     0 Drone1Idle
+
+
+
+
+string::stateName   string::type   bool::initial    bool::marker

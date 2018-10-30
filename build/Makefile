@@ -258,33 +258,6 @@ src/tds.cpp.s:
 	$(MAKE) -f CMakeFiles/TDS.dir/build.make CMakeFiles/TDS.dir/src/tds.cpp.s
 .PHONY : src/tds.cpp.s
 
-src/temp.o: src/temp.cpp.o
-
-.PHONY : src/temp.o
-
-# target to build an object file
-src/temp.cpp.o:
-	$(MAKE) -f CMakeFiles/TDS.dir/build.make CMakeFiles/TDS.dir/src/temp.cpp.o
-.PHONY : src/temp.cpp.o
-
-src/temp.i: src/temp.cpp.i
-
-.PHONY : src/temp.i
-
-# target to preprocess a source file
-src/temp.cpp.i:
-	$(MAKE) -f CMakeFiles/TDS.dir/build.make CMakeFiles/TDS.dir/src/temp.cpp.i
-.PHONY : src/temp.cpp.i
-
-src/temp.s: src/temp.cpp.s
-
-.PHONY : src/temp.s
-
-# target to generate assembly for a file
-src/temp.cpp.s:
-	$(MAKE) -f CMakeFiles/TDS.dir/build.make CMakeFiles/TDS.dir/src/temp.cpp.s
-.PHONY : src/temp.cpp.s
-
 src/transition.o: src/transition.cpp.o
 
 .PHONY : src/transition.o
@@ -336,9 +309,6 @@ help:
 	@echo "... src/tds.o"
 	@echo "... src/tds.i"
 	@echo "... src/tds.s"
-	@echo "... src/temp.o"
-	@echo "... src/temp.i"
-	@echo "... src/temp.s"
 	@echo "... src/transition.o"
 	@echo "... src/transition.i"
 	@echo "... src/transition.s"

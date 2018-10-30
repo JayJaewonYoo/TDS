@@ -1,0 +1,50 @@
+16
+2
+Drone1Grid Drone1Grid(0,0)
+Drone2Grid Drone2Grid(0,0)
+2
+Drone1Grid Drone1Grid(0,1)
+Drone2Grid Drone2Grid(0,1)
+2
+Drone1Grid Drone1Grid(0,2)
+Drone2Grid Drone2Grid(0,2)
+2
+Drone1Grid Drone1Grid(0,3)
+Drone2Grid Drone2Grid(0,3)
+2
+Drone1Grid Drone1Grid(1,0)
+Drone2Grid Drone2Grid(1,0)
+2
+Drone1Grid Drone1Grid(1,1)
+Drone2Grid Drone2Grid(1,1)
+2
+Drone1Grid Drone1Grid(1,2)
+Drone2Grid Drone2Grid(1,2)
+2
+Drone1Grid Drone1Grid(1,2)
+Drone2Grid Drone2Grid(1,2)
+2
+Drone1Grid Drone1Grid(2,0)
+Drone2Grid Drone2Grid(2,0)
+2
+Drone1Grid Drone1Grid(2,1)
+Drone2Grid Drone2Grid(2,1)
+2
+Drone1Grid Drone1Grid(2,2)
+Drone2Grid Drone2Grid(2,2)
+2
+Drone1Grid Drone1Grid(2,3)
+Drone2Grid Drone2Grid(2,3)
+2
+Drone1Grid Drone1Grid(3,0)
+Drone2Grid Drone2Grid(3,0)
+2
+Drone1Grid Drone1Grid(3,1)
+Drone2Grid Drone2Grid(3,1)
+2
+Drone1Grid Drone1Grid(3,2)
+Drone2Grid Drone2Grid(3,2)
+2
+Drone1Grid Drone1Grid(3,3)
+Drone2Grid Drone2Grid(3,3)
+

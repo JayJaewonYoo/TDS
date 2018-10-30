@@ -3,9 +3,11 @@ project(TDS)
 
 
 include_directories(include)
-link_directories("/usr/local/lib")
+INCLUDE_DIRECTORIES(/usr/local/include)
 
 file(GLOB SOURCES "src/*.cpp")
 
 add_executable(TDS ${SOURCES})
+TARGET_LINK_LIBRARIES(TDS /usr/local/lib/libbdd.so.0.0.0)
+
 

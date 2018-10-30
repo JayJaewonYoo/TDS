@@ -1,0 +1,15 @@
+Drone2
+xor 5   8
+Drone2Idle            simple 1 1        
+Drone2MovingUp        simple 0 0        
+Drone2MovingDown      simple 0 0        
+Drone2MovingLeft      simple 0 0        
+Drone2MovingRight     simple 0 0        
+1 1 Drone2Idle               startDrone2MovingUp       1 Drone2MovingUp
+1 1 Drone2MovingUp           doneDrone2MovingUp        0 Drone2Idle
+1 1 Drone2Idle               startDrone2MovingDown     1 Drone2MovingDown
+1 1 Drone2MovingDown         doneDrone2MovingDown      0 Drone2Idle
+1 1 Drone2Idle               startDrone2MovingLeft     1 Drone2MovingLeft
+1 1 Drone2MovingLeft         doneDrone2MovingLeft      0 Drone2Idle
+1 1 Drone2Idle               startDrone2MovingRight    1 Drone2MovingRight
+1 1 Drone2MovingRight        doneDrone2MovingRight     0 Drone2Idle

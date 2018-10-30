@@ -1,0 +1,6 @@
+DroneNetwork
+sync 4 0
+Drone1         xor            
+Drone1Grid     xor                        
+Drone2         xor            
+Drone2Grid     xor                        
