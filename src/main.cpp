@@ -18,8 +18,8 @@ int main(int argc, char *argv[]){
     string rootFile = "DroneNetwork";
     cout << "Welcome to DES version 1.0" << endl;
 
-
     TDS temp(filePath, rootFile);
+    temp.print();
     temp.run();
     temp.supcon(filePath);
     temp.runUnderControl();

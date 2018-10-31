@@ -19,6 +19,11 @@ DES* TDS::inputReader(string filePath, string fileName, DES* par){
     string name, type;
     int size, tsize;// component size and number of transitions, tsize = 0 in case of sync TDSs
     is >> name >> type >> size >> tsize;
+    if(is.fail()){
+        cerr << "Error: Input file " << filePath + "/" + fileName + ".txt"
+             << " name read fail!" << endl;
+        abort();
+    }
 
     DES* newDES;
     int fddState = (par)? par->getCompSize(): 0;
@@ -108,7 +113,7 @@ void TDS::setInitials(){
 }
 
 void TDS::run(){
-    cout << "Open loop transition: " << endl;
+    cout << "Open loop simulation: " << endl;
     if(!initialSet)
         setInitials();
     vector<bdd> visitedStates;
@@ -186,10 +191,9 @@ void TDS::supcon(string filePath){
     if(!initialSet)
         setInitials();
     bdd P = readSpecFile(filePath);
-
-    P0 = root->initialPredicate();
-    Pm = root->markerPredicate();
+    //fdd_printset(P); cout << endl;
     createSupC2P(P);
+    //fdd_printset(supC2P); cout << endl;
     for(auto& sigma:Sigma)
         sigma.second->setFSigma(supC2P);
 }
@@ -268,7 +272,7 @@ void TDS::runUnderControlRec(bdd current, vector<bdd>& visitedStates, int currIn
                 cout << nextIndex << ": "; fdd_printset(next);cout << endl;
                 if (it == visitedStates.end()){
                     visitedStates.push_back(next);
-                    runRec(next,visitedStates,nextIndex, numOfTransitions);
+                    runUnderControlRec(next,visitedStates,nextIndex, numOfTransitions);
                 }
             }
         }

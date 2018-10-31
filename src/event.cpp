@@ -61,8 +61,8 @@ bdd event::gamma(bdd pred){
 bdd event::getFSigma(){return fSigma;}
 void event::setFSigma(bdd P){
     bdd nextG = bdd_exist(nSigma,setOfSrcVars);
-    bdd Ngood = nextG & P;
-    fSigma = this->gamma(Ngood);
+    bdd nGood = nextG & P;
+    fSigma = this->gamma(nGood);
 }
 
 bool eCmp::operator()(const ePtr& e1, const ePtr& e2)const{
