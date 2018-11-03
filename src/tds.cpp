@@ -271,10 +271,13 @@ void TDS::runUnderControlRec(bdd current, vector<bdd>& visitedStates, int currIn
                     return P == next;
                 });
                 int nextIndex = distance(visitedStates.begin(),it);
-                cout << nextIndex << ": "; fdd_printset(next);cout << endl;
+
                 if (it == visitedStates.end()){
                     visitedStates.push_back(next);
                     runUnderControlRec(next,visitedStates,nextIndex, numOfTransitions);
+                }
+                else {
+                    cout << nextIndex << ": "; fdd_printset(next);cout << endl;
                 }
             }
         }
