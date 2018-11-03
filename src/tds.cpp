@@ -123,7 +123,6 @@ void TDS::run(){
     cout << "States: " << visitedStates.size() <<
             ", Transitions: " << numOfTransitions << endl;
 }
-
 void TDS::runRec(bdd current, vector<bdd>& visitedStates, int currIndex, int& numOfTransitions){
     cout << currIndex << ":"; fdd_printset(current);
     if ( (current & Pm) != bddfalse)
@@ -138,14 +137,17 @@ void TDS::runRec(bdd current, vector<bdd>& visitedStates, int currIndex, int& nu
                 return P == next;
             });
             int nextIndex = distance(visitedStates.begin(),it);
-            cout << nextIndex << ": "; fdd_printset(next);cout << endl;
             if (it == visitedStates.end()){
                 visitedStates.push_back(next);
                 runRec(next,visitedStates,nextIndex, numOfTransitions);
             }
+            else{
+                cout << nextIndex << ": "; fdd_printset(next);cout << endl;
+            }
          }
     }
 }
+
 //specification given in dijuntive form
 //predicate corresponding to illegal set of states
 bdd TDS::readSpecFile(string filePath){

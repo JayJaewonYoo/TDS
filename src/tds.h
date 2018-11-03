@@ -17,13 +17,23 @@ public:
     void readTransitions(ifstream& is, DES* G, int tsize);
     //
     event* addEvent(istream& is);
-    // open-loop run of the system
-    void setInitials();
 
+    void setInitials();
+    // open-loop run of the system
     void run();
     void runRec(bdd current, vector<bdd>& visitedStates,
                 int currIndex, int& numOfTransitions);
 
+    //Local simulation
+    void localRun(string G){
+        DES* localRoot = root->findComponent(G);
+        if (localRoot == nullptr){
+            cerr << "Error: Local root " << G << " not found!" << endl;
+            abort();
+        }
+        cout << "Open-loop behavior under the component " << localRoot->getName() << endl;
+
+    }
     //specification given in dijuntive form
     //predicate corresponding to illegal set of states
     bdd readSpecFile(string filePath);
@@ -34,7 +44,7 @@ public:
     bdd CR(bdd& P);
     bdd supCP(bdd& P);
     bdd Bracket(bdd& P);
-    //
+    // closed-loop run of the system
     void runUnderControl();
     void runUnderControlRec(bdd current, vector<bdd>&
                             visitedStates, int currIndex, int& numOfTransitions);

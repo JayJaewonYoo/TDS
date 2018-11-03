@@ -21,8 +21,8 @@ Drone2Grid Drone2Grid(1,1)
 Drone1Grid Drone1Grid(1,2)
 Drone2Grid Drone2Grid(1,2)
 2
-Drone1Grid Drone1Grid(1,2)
-Drone2Grid Drone2Grid(1,2)
+Drone1Grid Drone1Grid(1,3)
+Drone2Grid Drone2Grid(1,3)
 2
 Drone1Grid Drone1Grid(2,0)
 Drone2Grid Drone2Grid(2,0)

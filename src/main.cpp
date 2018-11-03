@@ -14,13 +14,14 @@ int main(int argc, char *argv[]){
     bdd_setvarnum(10000);
     fdd_file_hook(printhandler);
 
-    string filePath = "Input/Drone";
-    string rootFile = "DroneNetwork";
+    string filePath = "Input/Test1";
+    string rootFile = "X0";
     cout << "Welcome to DES version 1.0" << endl;
 
     TDS temp(filePath, rootFile);
     temp.print();
     temp.run();
+    //temp.localRun("X22");
     temp.supcon(filePath);
     temp.runUnderControl();
 
