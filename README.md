@@ -1,5 +1,5 @@
 # TDS
-This is a beta version of TDS software version 1.0. This is an educational tool for efficient supervisory control synthesis of discrete-event systems. 
+This is a demo of TDS software version 1.0. This is an educational tool for efficient supervisory control synthesis of discrete-event systems. 
 
 Required tools:
  1. cmake (See here: https://cmake.org/download/)
