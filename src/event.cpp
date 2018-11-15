@@ -50,7 +50,6 @@ bdd event::delta(bdd pred){
                         ,
                         setOfSrcVars);
 }
-
 bdd event::gamma(bdd pred){
     return bdd_replace(
                         bdd_exist( pred & nSigma

@@ -20,20 +20,11 @@ public:
 
     void setInitials();
     // open-loop run of the system
-    void run();
+    void run(string G = "");
     void runRec(bdd current, vector<bdd>& visitedStates,
-                int currIndex, int& numOfTransitions);
+                int currIndex, int& numOfTransitions,
+                bool local, bdd& setOfVars);
 
-    //Local simulation
-    void localRun(string G){
-        DES* localRoot = root->findComponent(G);
-        if (localRoot == nullptr){
-            cerr << "Error: Local root " << G << " not found!" << endl;
-            abort();
-        }
-        cout << "Open-loop behavior under the component " << localRoot->getName() << endl;
-
-    }
     //specification given in dijuntive form
     //predicate corresponding to illegal set of states
     bdd readSpecFile(string filePath);
@@ -50,6 +41,7 @@ public:
                             visitedStates, int currIndex, int& numOfTransitions);
     //
     void print();
+    void printControlData(string filePath);
 private:
     DESPtr root;
     unordered_map<string,ePtr> Sigma;

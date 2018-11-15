@@ -112,19 +112,44 @@ void TDS::setInitials(){
     initialSet = true;
 }
 
-void TDS::run(){
-    cout << "Open loop simulation: " << endl;
+void TDS::run(string G){
     if(!initialSet)
         setInitials();
     vector<bdd> visitedStates;
     visitedStates.push_back(P0);
     int numOfTransitions = 0;
-    runRec(P0,visitedStates,0, numOfTransitions);
+    bdd setOfVars = bddtrue;
+    bool localSimulation = false;
+    if (!G.empty()){
+        DES* localRoot = root->findComponent(G);
+        if (localRoot == nullptr){
+            cerr << "Error: Local root " << G << " not found!" << endl;
+            abort();
+        }
+        int localFddIndex = localRoot->getfddDomain();
+        for(int i = 1; i < fdd_domainnum(); i+=2){
+            if (i != localFddIndex )
+                setOfVars &= fdd_ithset(i);
+        }
+        localSimulation = true;
+        cout << "Open-loop behavior under the component " << localRoot->getName() << endl;
+    }
+    else {
+        cout << "Open loop simulation: " << endl;
+    }
+    runRec(P0,visitedStates,0, numOfTransitions,localSimulation, setOfVars);
     cout << "States: " << visitedStates.size() <<
             ", Transitions: " << numOfTransitions << endl;
 }
-void TDS::runRec(bdd current, vector<bdd>& visitedStates, int currIndex, int& numOfTransitions){
-    cout << currIndex << ":"; fdd_printset(current);
+void TDS::runRec(bdd current, vector<bdd>& visitedStates, int currIndex,
+                 int& numOfTransitions, bool local, bdd &setOfVars){
+    if (local){
+        cout << currIndex << ":"; fdd_printset(bdd_exist(current,setOfVars));
+    }
+    else {
+        cout << currIndex << ":"; fdd_printset(current);
+    }
+
     if ( (current & Pm) != bddfalse)
         cout << "*";
     cout << endl;
@@ -139,10 +164,13 @@ void TDS::runRec(bdd current, vector<bdd>& visitedStates, int currIndex, int& nu
             int nextIndex = distance(visitedStates.begin(),it);
             if (it == visitedStates.end()){
                 visitedStates.push_back(next);
-                runRec(next,visitedStates,nextIndex, numOfTransitions);
+                runRec(next,visitedStates,nextIndex, numOfTransitions, local, setOfVars);
             }
-            else{
-                cout << nextIndex << ": "; fdd_printset(next);cout << endl;
+            else if (local){
+                    cout << nextIndex << ":"; fdd_printset(bdd_exist(next,setOfVars));cout << endl;
+                }
+            else {
+                cout << nextIndex << ":"; fdd_printset(next);cout << endl;
             }
          }
     }
@@ -285,4 +313,25 @@ void TDS::runUnderControlRec(bdd current, vector<bdd>& visitedStates, int currIn
 }
 void TDS::print(){
     cout << *root;
+}
+void TDS::printControlData(string filePath){
+    FILE* controlledBehavior;
+    string directory = filePath + "/results/controlledBehavior";
+    controlledBehavior = fopen(directory.c_str(),"w");
+    if (controlledBehavior == nullptr){
+        cerr << "Error: controlledBehavior cannot be created!" << endl;
+        abort();
+    }
+    bdd_fprintdot(controlledBehavior,supC2P);
+    fclose(controlledBehavior);
+    for(auto& sigma: Sigma){
+        if (sigma.second->isControllable()){
+            FILE* sigmaEN;
+            string tempDir = filePath + "/results/"+sigma.second->getName();
+            sigmaEN = fopen(tempDir.c_str(),"w");
+            bdd_fprintdot(sigmaEN, sigma.second->getFSigma());
+            fclose(sigmaEN);
+        }
+    }
+
 }
