@@ -7,6 +7,6 @@ Required tools:
  
  To build the project:
  1. Go to build directory.
- 2. Run ./build.sh <inputDirectory> <rootFileName>
+ 2. Run ./build.sh inputDirectory rootFileName
 
 This project is currently under development. More information to come...
