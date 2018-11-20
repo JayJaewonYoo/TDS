@@ -18,7 +18,11 @@ cmake ..
 make
 
 cd $INPUT_DIRECTORY
-mkdir results
+if ! [ -d results ]
+then
+	mkdir results
+fi
+
 cd -
 
 ./TDS $INPUT_DIRECTORY $ROOT_FILE > "$INPUT_DIRECTORY/results/output.txt"

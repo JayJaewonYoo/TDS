@@ -1,99 +1,20 @@
 #include "tds.h"
+#include "io.h"
+#include "spec.h"
 
 TDS::TDS(string fileName, string filePath){
-    root.reset(inputReader(fileName, filePath));
+    root.reset(IO::inputReader(fileName, filePath,nullptr, this));
     initialSet = false;
     supC2P = bddtrue;
 }
-
-
-DES* TDS::inputReader(string filePath, string fileName, DES* par){
-    ifstream is(filePath + "/" + fileName + ".txt");
-    if(is.fail()){
-        cerr << "Error: Input file " << filePath + "/" + fileName + ".txt"
-             << " not found!" << endl;
-        abort();
-    }
-    cout << "Inupt file" << filePath + "/" + fileName + ".txt" << " opened!" << endl;
-
-    string name, type;
-    int size, tsize;// component size and number of transitions, tsize = 0 in case of sync TDSs
-    is >> name >> type >> size >> tsize;
-    if(is.fail()){
-        cerr << "Error: Input file " << filePath + "/" + fileName + ".txt"
-             << " name read fail!" << endl;
-        abort();
-    }
-
-    DES* newDES;
-    int fddState = (par)? par->getCompSize(): 0;
-    if ( type == "xor" ){
-        newDES = new xorDES(name,par,size,fddState);
-        readComponents(filePath,is,newDES,size);
-        readTransitions(is,newDES,tsize);
-    }
-    else if ( type == "sync" ){
-        newDES = new syncDES(name,par,size,fddState);
-        readComponents(filePath,is,newDES,size);
-    }
-    else {
-        cerr << "Error: Unkown type " << type << " in " <<
-                filePath + "/" + name + ".txt" << endl;
-        abort();
-    }
-    cout << "Inupt file" << filePath + "/" + name + ".txt" << " read!" << endl;
-    return newDES;
+DES* TDS::findComponent(string G){
+    return root->findComponent(G);
 }
-
-
-void TDS::readComponents(string filePath, ifstream& is, DES* parent, int size){
-    cout << "Reading components of " <<
-            filePath + "/" + parent->getName() + ".txt!" << endl;
-    for( int i = 0; i < size; ++i){
-        string name, type;
-        is >> name >> type;
-        DES* newDES;
-        if ( type == "simple"){
-            bool init, marker;
-            is >> init >> marker;
-            if (is.fail()){
-                cerr << "Error: initial and marker bits are not set for simple DES "
-                     << name << " in " << filePath + "/" + parent->getName() + ".txt!" << endl;
-                abort();
-            }
-            newDES = new simpleDES(name,parent, parent->getCompSize(),init,marker);
-        }
-        else if (type == "xor" || type == "sync")
-           newDES = inputReader(filePath, name,parent);
-        else {
-            cerr << "Error: Unkown type " << type << " in " <<
-                    filePath + "/" + name + ".txt" << endl;
-            abort();
-        }
-        parent->addComponent(newDES);
-    }
-    cout << "Components of " <<
-            filePath + "/" + parent->getName() + ".txt" << " read!" << endl;
-}
-
-void TDS::readTransitions(ifstream& is, DES* G, int tsize){
-    cout << "Reading transitions of " <<
-            G->getName() << "!" << endl;
-    delta* transitionStructure = new delta();
-    for(int i = 0; i < tsize; ++i){
-        transition* newTransition = new transition();
-        int numOfSrcs, numOfDsts;
-        is >> numOfSrcs >> numOfDsts;
-
-        newTransition->addSrc(is,G,numOfSrcs);
-        newTransition->setEvent(this->addEvent(is), G);
-        newTransition->addDst(is,G,numOfDsts);
-        transitionStructure->addTransition(newTransition);
-    }
-    transitionStructure->symbolicEncoding(G, G->getAddPred());
-    G->addDelta(transitionStructure);
-    cout << "Transitions  of " <<
-            G->getName() << " read!" << endl;
+event* TDS::findEvent(string s){
+    auto it = Sigma.find(s);
+    if (it == Sigma.end())
+        return nullptr;
+    else return it->second.get();
 }
 event* TDS::addEvent(istream& is){
     string e;
@@ -178,49 +99,12 @@ void TDS::runRec(bdd current, vector<bdd>& visitedStates, int currIndex,
 
 //specification given in dijuntive form
 //predicate corresponding to illegal set of states
-bdd TDS::readSpecFile(string filePath){
-    ifstream input(filePath + "/spec.txt");
-    if (input.fail()){
-        cerr << "Error: spec file not found!" << endl;
-        abort();
-    }
-    int numOfLiterals;
-    input >> numOfLiterals;
-    bdd predicate = bddfalse;
-    while(numOfLiterals){
-        int sizeOfLiteral;
-        input >> sizeOfLiteral;
-        bdd literal = bddtrue;
-        while(sizeOfLiteral){
-            string var, value;
-            input >> var >> value;
-            DES* D1 = root->findComponent(var);
-            if (D1 == nullptr){
-                cerr << "Error: DES " << var << " not found in spec file!" << endl;
-                abort();
-            }
-            DES* D2 = root->findComponent(value);
-            if (D2 == nullptr){
-                cerr << "Error: DES " << value << " not found in spec file!" << endl;
-                abort();
-            }
-            if (D1->getType() != DEStype::XOR){
-                cerr << "Error: DES " << var << " is not an XOR product DES!" << endl;
-                abort();
-            }
-            literal &= fdd_ithvar(D1->getfddDomain(), D2->getfddState());
-            literal &= D1->getAddPred();
-            sizeOfLiteral--;
-        }
-        predicate |= literal;
-        numOfLiterals--;
-    }
-    return bdd_not(predicate);
-}
+
 void TDS::supcon(string filePath){
     if(!initialSet)
         setInitials();
-    bdd P = readSpecFile(filePath);
+    bdd P = spec::readSpec1File(filePath,this);
+    P &= spec::readSpec2File(filePath, this);
     //fdd_printset(P); cout << endl;
     createSupC2P(P);
     //fdd_printset(supC2P); cout << endl;
@@ -316,20 +200,20 @@ void TDS::print(){
 }
 void TDS::printControlData(string filePath){
     FILE* controlledBehavior;
-    string directory = filePath + "/results/controlledBehavior";
+    string directory = filePath + "/results/controlledBehavior.txt";
     controlledBehavior = fopen(directory.c_str(),"w");
     if (controlledBehavior == nullptr){
         cerr << "Error: controlledBehavior cannot be created!" << endl;
         abort();
     }
-    bdd_fprintdot(controlledBehavior,supC2P);
+    fdd_fprintset(controlledBehavior,supC2P);
     fclose(controlledBehavior);
     for(auto& sigma: Sigma){
         if (sigma.second->isControllable()){
             FILE* sigmaEN;
-            string tempDir = filePath + "/results/"+sigma.second->getName();
+            string tempDir = filePath + "/results/"+sigma.second->getName()+".txt";
             sigmaEN = fopen(tempDir.c_str(),"w");
-            bdd_fprintdot(sigmaEN, sigma.second->getFSigma());
+            fdd_fprintset(sigmaEN, sigma.second->getFSigma());
             fclose(sigmaEN);
         }
     }

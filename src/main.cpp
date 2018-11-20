@@ -18,7 +18,7 @@ int main(int argc, char *argv[]){
 
 
     if (argc != 3){
-        cerr << "Error: invalid command line argments!" << endl;
+        cerr << "Error: invalid command line arguments!" << endl;
         abort;
     }
     string filePath = argv[1];

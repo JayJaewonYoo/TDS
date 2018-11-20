@@ -64,6 +64,31 @@ void event::setFSigma(bdd P){
     fSigma = this->gamma(nGood);
 }
 
+/*
+ * This method is used to handle type2 specifications.
+ * P is the predicate at which this event must not occre.
+ * If event is controllable, we modify its transition predicate,
+ * else, we return the conjunction of P and the eligbility predicate;
+ */
+bdd event::handleIllegalPredicate(bdd& P){
+    bdd retBDD = bddfalse;
+    if (this->isControllable()){
+        nSigma &= bdd_not( bdd_replace(P,srcToPsrc)
+                           &
+                           nSigma);
+
+    }
+    else{
+        retBDD = bdd_replace(
+                    bdd_exist(
+                        bdd_replace(P,srcToPsrc)&nSigma,
+                        setOfDstVars),
+                    psrcToSrc);
+    }
+
+    return retBDD;
+}
+
 bool eCmp::operator()(const ePtr& e1, const ePtr& e2)const{
     return e1->getName() < e2->getName();
 }

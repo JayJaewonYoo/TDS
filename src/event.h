@@ -32,6 +32,7 @@ public:
     bdd gamma(bdd pred);
     bdd getFSigma();
     void setFSigma(bdd P);
+    bdd handleIllegalPredicate(bdd& P);
 private:
     string name;
     bool   ctrb; // event is controllable if "ctrb = true"; default value is "true";

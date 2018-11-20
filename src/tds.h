@@ -9,15 +9,9 @@
 class TDS{
 public:
     TDS(string fileName, string filePath);
-    //read input file
-    DES* inputReader(string filePath, string fileName, DES* par = nullptr);
-    // read components part of the input file
-    void readComponents(string filePath, ifstream& is, DES* parent, int size);
-    // read transitions part of the input file
-    void readTransitions(ifstream& is, DES* G, int tsize);
-    //
     event* addEvent(istream& is);
-
+    DES* findComponent(string G);
+    event* findEvent(string e);
     void setInitials();
     // open-loop run of the system
     void run(string G = "");
@@ -27,7 +21,7 @@ public:
 
     //specification given in dijuntive form
     //predicate corresponding to illegal set of states
-    bdd readSpecFile(string filePath);
+    //bdd readSpecFile(string filePath);
 
     // sysnthesis functions
     void supcon(string filePath);
