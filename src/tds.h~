@@ -36,7 +36,7 @@ public:
     //
     void print();
     void printControlData(string filePath);
-    void printADS(string filePath, string rootFile); // ADS
+    void printADS(string filePath); // ADS
 private:
     DESPtr root;
     unordered_map<string,ePtr> Sigma;
