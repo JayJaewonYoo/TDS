@@ -34,8 +34,6 @@ int main(int argc, char *argv[]){
     temp.printControlData(filePath);
 
     // Changes begin here:
-    cout << endl;
-    cout << endl;
     temp.printADS(filePath, rootFile);
 
     return 0;
