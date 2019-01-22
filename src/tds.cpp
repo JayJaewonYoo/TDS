@@ -326,14 +326,13 @@ void TDS::printADS(string filePath, string rootFile) {
 					string stateName = line.substr(0, line.find(" "));
 					if(statesMap.find(stateName) == statesMap.end()) {
 						statesMap[stateName] = stateCount;	
-						stateCount++;
 					
-						// The following is poor code that should probably be optimized in the future:
 						string last = line.substr(line.find("simple"), line.find("  "));
 						last = last.substr(last.find(" ") + 1, last.length() - 1);
 						last = last.substr(last.find(" ") + 1, last.find(" ") + 1);
 						last = last.substr(0, 1);
 						if(last == "1") markerStates.push_back(stateCount);
+						stateCount++;
 					}
 				} else if(!simpleCheck && line.find("xor") == string::npos && line.find("sync") == string::npos) {
 					bool valid = false;
