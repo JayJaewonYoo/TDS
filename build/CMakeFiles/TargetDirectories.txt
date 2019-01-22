@@ -1,3 +1,0 @@
-/home/jayyoo/Documents/TDS/build/CMakeFiles/rebuild_cache.dir
-/home/jayyoo/Documents/TDS/build/CMakeFiles/TDS.dir
-/home/jayyoo/Documents/TDS/build/CMakeFiles/edit_cache.dir
