@@ -276,7 +276,7 @@ void TDS::printADSsupervisor(string filePath, string rootFile) {
 	}
 	fputs((rootFile + "_Supervisor").c_str(), adsFile);
 
-	// Finding events:
+	// Finding states:
 	while(fileLinkedListHead != NULL) {
 		// Checking the file:
 		string currFileName = fileLinkedListHead->fileName + ".txt";
@@ -327,21 +327,19 @@ void TDS::printADSsupervisor(string filePath, string rootFile) {
 					for(vector<string>::iterator it = statesList.begin(); it != statesList.end(); ++it) {
 						if(line.find(*it) != string::npos) {
 							valid = true;
-							line = line.substr(line.find(*it) + (*it).length());
+							/*line = line.substr(line.find(*it) + (*it).length());
 							while(line[0] == ' ') {
 								line = line.substr(1);
 							}
-							line = line.substr(0, line.find(' '));
+							line = line.substr(0, line.find(' '));*/
 
-							
-							// USE https://stackoverflow.com/questions/97050/stdmap-insert-or-stdmap-find INSTEAD
-							if(line != "" && line != " " && line != "\n") {
-								pair<map<string, int>::iterator, bool> existCheck = eventsMap.insert(pair<string, int>(line, eventInt));
-								//if(eventsMap.find(line) == eventsMap.end()) {
-								if(existCheck.second == false) {
-									//eventsMap[line] = eventInt;
-									eventInt++;
-								}
+							/* New implementation */
+							line.erase(std::remove(line.begin(), line.end(), '\n'), line.end());
+							while(line.back() == ' ') line.pop_back();
+
+							if(eventsMap.find(line) == eventsMap.end()) {
+								eventsMap[line] = eventInt;
+								eventInt++;
 							}
 						}
 					}
@@ -350,7 +348,6 @@ void TDS::printADSsupervisor(string filePath, string rootFile) {
 		} while(c != EOF);
 		fclose(currFile);
 		free(buffer);
-
 	}
 	free(fileLinkedListHead);
 
