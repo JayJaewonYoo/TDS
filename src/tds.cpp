@@ -336,9 +336,20 @@ void TDS::printADSsupervisor(string filePath, string rootFile) {
 							/* New implementation */
 							line.erase(std::remove(line.begin(), line.end(), '\n'), line.end());
 							while(line.back() == ' ') line.pop_back();
+							for(int i = 0; i < 2; i++) line = line.substr(line.find(" ") + 1);
+							reverse(line.begin(), line.end());
+							line = line.substr(line.find(" "));
+							line = line.substr(line.find(" ") + 2);
+							reverse(line.begin(), line.end());
+							while(line.back() == ' ') line.pop_back();
+							reverse(line.begin(), line.end());
+							line = line.substr(0, line.find(" "));
+							string line2 = line;
+							reverse(line2.begin(), line2.end());
+							//line = line.substr(0, -2);
 
-							if(eventsMap.find(line) == eventsMap.end()) {
-								eventsMap[line] = eventInt;
+							if(eventsMap.find(line2) == eventsMap.end()) {
+								eventsMap[line2] = eventInt;
 								eventInt++;
 							}
 						}
