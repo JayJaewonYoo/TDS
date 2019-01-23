@@ -222,8 +222,187 @@ void TDS::printControlData(string filePath){
 
 }
 
-// ADS File Output:
-void TDS::printADS(string filePath, string rootFile) {
+// ADS Supervisory Control File Output:
+void TDS::printADSsupervisor(string filePath, string rootFile) {
+	if(!initialSet)
+	setInitials();
+	vector<bdd> visitedStates;
+	if ((P0 & supC2P) == bddfalse){
+	cout << "Closed behavior is empty!" << endl;
+	return;
+	}
+	visitedStates.push_back(P0);
+	int numOfTransitions = 0;
+
+	int maxIndex = 0;
+	int highest_odd_event = -1;
+	int highest_even_event = -1;
+	map<string, int> eventsMap;
+	vector<string> statesList;
+
+	struct node {
+		string fileName;
+		struct node *next;
+	};
+
+	// Getting list of DES that will become ADS files:
+	struct node* fileLinkedListHead = NULL;
+	ifstream root;
+	root.open(filePath + "/" + rootFile + ".txt");
+	if(!root) {
+		cerr << "Error: ADS file cannot be created!" << endl;
+		abort();
+	}
+	string line;
+	string tempLine = "";
+	while(root >> line) {
+		if(line == "xor") {
+			struct node* tempNode = new node;
+			tempNode->fileName = tempLine;
+			tempNode->next = fileLinkedListHead;
+			fileLinkedListHead = tempNode;
+		}
+		tempLine = line;
+	}
+	root.close();
+
+	// Creating ADS file:
+	FILE* adsFile;
+	string directory = filePath + "/results/supervisor.ads";
+	adsFile = fopen(directory.c_str(), "w");
+	if(adsFile == nullptr) {
+		cerr << "Error: ADS file cannot be created!" << endl;
+		abort();
+	}
+	fputs((rootFile + "_Supervisor").c_str(), adsFile);
+
+	// Finding events:
+	while(fileLinkedListHead != NULL) {
+		// Checking the file:
+		string currFileName = fileLinkedListHead->fileName + ".txt";
+
+		if(fileLinkedListHead->next != NULL) {
+			struct node* toBeDeleted = fileLinkedListHead;
+			fileLinkedListHead = fileLinkedListHead->next;
+			free(toBeDeleted);
+		}
+		else fileLinkedListHead = NULL;
+
+		FILE* currFile;
+		string currFileDirectory = filePath + "/" + currFileName;
+		currFile = fopen(currFileDirectory.c_str(), "r");
+		if(currFile == nullptr) {
+			cerr << "Error: ADS file cannot be created!" << endl;
+			abort();
+		}
+
+		int c, i, size = 1024;
+		char* buffer = (char *)malloc(size);
+
+		bool first = true;
+		unsigned int eventInt = 0;
+
+		do {
+			i = 0;
+			do {
+				c = fgetc(currFile);
+				if(c != EOF) buffer[i++] = (char)c;
+				if(i >= size - 1) {
+					size += size;
+					buffer = (char*)realloc(buffer, size);
+				}
+			} while(c != EOF && c != '\n');
+			buffer[i] = 0;
+
+			if(first) first = false;
+			else {
+				// Parsing the text files:
+				string line(buffer);
+				if(line.find("simple") != string::npos) {
+					string stateName = line.substr(0, line.find(" "));
+					if(find(statesList.begin(), statesList.end(), stateName) == statesList.end()) statesList.push_back(stateName);
+				}
+				else if(line.find("simple") == string::npos && line.find("xor") == string::npos && isdigit(line[0])) {
+					bool valid = false;
+					for(vector<string>::iterator it = statesList.begin(); it != statesList.end(); ++it) {
+						if(line.find(*it) != string::npos) {
+							valid = true;
+							line = line.substr(line.find(*it) + (*it).length());
+							while(line[0] == ' ') {
+								line = line.substr(1);
+							}
+							line = line.substr(0, line.find(' '));
+
+							
+							// USE https://stackoverflow.com/questions/97050/stdmap-insert-or-stdmap-find INSTEAD
+							if(line != "" && line != " " && line != "\n") {
+								pair<map<string, int>::iterator, bool> existCheck = eventsMap.insert(pair<string, int>(line, eventInt));
+								//if(eventsMap.find(line) == eventsMap.end()) {
+								if(existCheck.second == false) {
+									//eventsMap[line] = eventInt;
+									eventInt++;
+								}
+							}
+						}
+					}
+				}
+			}	
+		} while(c != EOF);
+		fclose(currFile);
+		free(buffer);
+
+	}
+	free(fileLinkedListHead);
+
+	// Testing, remove later:
+	fputs("\n", adsFile);
+	for(map<string, int>::iterator it = eventsMap.begin(); it != eventsMap.end(); ++it) {
+		fputs("*", adsFile);
+		fputs((it->first).c_str(), adsFile);
+		fputs("*", adsFile);
+		fputs("\n", adsFile);
+		//fprintf(adsFile, "%d", it->second);
+		//fputs("\n", adsFile);
+	}
+	/******************/
+
+	// max index + 1 as max number of states, pass in the vectors of strings to pass through for each section then return
+	// printADSsupervisor_rec(P0, visitedStates, 0, numOfTransitions, maxIndex); // Make this return what you need
+	// File manipulation here
+	fclose(adsFile);
+}
+
+void TDS::printADSsupervisor_rec(bdd current, vector<bdd>& visitedStates, int currIndex, int& numOfTransitions, int maxIndex /*, stringMap, markerState*/) {
+    /* cout << currIndex << ":"; fdd_printset(current);
+    if ( (current & Pm) != bddfalse)
+        cout << "*";
+    cout << endl;
+
+    for(auto& sigma:Sigma){
+        if((sigma.second->getFSigma() & current) != bddfalse){
+            bdd next = sigma.second->delta(current);
+            if ( next != bddfalse ){
+                numOfTransitions++;
+                cout << currIndex << "-Via: " << sigma.first <<endl;
+                auto it = find_if(visitedStates.begin(), visitedStates.end(),[&](auto& P){
+                    return P == next;
+                });
+                int nextIndex = distance(visitedStates.begin(),it);
+
+                if (it == visitedStates.end()){
+                    visitedStates.push_back(next);
+                    runUnderControlRec(next,visitedStates,nextIndex, numOfTransitions);
+                }
+                else {
+                    cout << nextIndex << ": "; fdd_printset(next);cout << endl;
+                }
+            }
+        }
+    }*/
+}
+
+// ADS Input File Output:
+void TDS::printADSinputs(string filePath, string rootFile) {
 	/*FILE* adsFile;
 	string directory = filePath + "/results/" + rootFile + ".ads";
 	adsFile = fopen(directory.c_str(), "w");

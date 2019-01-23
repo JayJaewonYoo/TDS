@@ -34,7 +34,8 @@ int main(int argc, char *argv[]){
     temp.printControlData(filePath);
 
     // Changes begin here:
-    temp.printADS(filePath, rootFile);
+    temp.printADSsupervisor(filePath, rootFile);
+    // temp.printADSinputs(filePath, rootFile);
 
     return 0;
 }
