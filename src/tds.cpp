@@ -341,11 +341,11 @@ void TDS::printADSsupervisor(string filePath, string rootFile) {
 							if(eventsMap.find(line2) == eventsMap.end()) {
 								controlLine = controlLine.substr(1, 1);
 								int eventInt = 0;
-								if(controlLine == "1") {
+								if(controlLine == "0") {
 									// Controllable event
 									highest_even_event += 2;
 									eventInt = highest_even_event;
-								} else if(controlLine == "0") {
+								} else if(controlLine == "1") {
 									// Uncontrollable event
 									highest_odd_event += 2;
 									eventInt = highest_odd_event;
