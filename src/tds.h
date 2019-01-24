@@ -2,6 +2,7 @@
 #define TDS_H
 
 #include "des.h"
+#include <map> // ADS
 
 #define BDD_nodeNUM 1000000
 #define BDD_cacheSize 10000
@@ -38,7 +39,7 @@ public:
     void printControlData(string filePath);
     void printADSinputs(string filePath, string rootFile); // ADS
     void printADSsupervisor(string filePath, string rootFile); // ADS
-    void printADSsupervisor_rec(bdd current, vector<bdd>& visitedStates, int currINdex, int& numOfTransitions, int maxIndex); // ADS
+    void printADSsupervisor_rec(bdd current, vector<bdd>& visitedStates, int currIndex, int& numOfTransitions, int maxIndex, map<string, int> eventsMap, vector<int> markerStates, vector<string> transitionStatements); // ADS
 private:
     DESPtr root;
     unordered_map<string,ePtr> Sigma;

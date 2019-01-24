@@ -236,7 +236,7 @@ void TDS::printADSsupervisor(string filePath, string rootFile) {
 
 	int maxIndex = 0;
 	int highest_odd_event = -1;
-	int highest_even_event = -1;
+	int highest_even_event = -2;
 	map<string, int> eventsMap;
 	vector<string> statesList;
 
@@ -275,6 +275,7 @@ void TDS::printADSsupervisor(string filePath, string rootFile) {
 		abort();
 	}
 	fputs((rootFile + "_Supervisor").c_str(), adsFile);
+	fputs("\n", adsFile);
 
 	// Finding states:
 	while(fileLinkedListHead != NULL) {
@@ -300,7 +301,6 @@ void TDS::printADSsupervisor(string filePath, string rootFile) {
 		char* buffer = (char *)malloc(size);
 
 		bool first = true;
-		unsigned int eventInt = 0;
 
 		do {
 			i = 0;
@@ -323,22 +323,14 @@ void TDS::printADSsupervisor(string filePath, string rootFile) {
 					if(find(statesList.begin(), statesList.end(), stateName) == statesList.end()) statesList.push_back(stateName);
 				}
 				else if(line.find("simple") == string::npos && line.find("xor") == string::npos && isdigit(line[0])) {
-					bool valid = false;
 					for(vector<string>::iterator it = statesList.begin(); it != statesList.end(); ++it) {
 						if(line.find(*it) != string::npos) {
-							valid = true;
-							/*line = line.substr(line.find(*it) + (*it).length());
-							while(line[0] == ' ') {
-								line = line.substr(1);
-							}
-							line = line.substr(0, line.find(' '));*/
-
-							/* New implementation */
 							line.erase(std::remove(line.begin(), line.end(), '\n'), line.end());
 							while(line.back() == ' ') line.pop_back();
 							for(int i = 0; i < 2; i++) line = line.substr(line.find(" ") + 1);
 							reverse(line.begin(), line.end());
 							line = line.substr(line.find(" "));
+							string controlLine = line;
 							line = line.substr(line.find(" ") + 2);
 							reverse(line.begin(), line.end());
 							while(line.back() == ' ') line.pop_back();
@@ -346,11 +338,20 @@ void TDS::printADSsupervisor(string filePath, string rootFile) {
 							line = line.substr(0, line.find(" "));
 							string line2 = line;
 							reverse(line2.begin(), line2.end());
-							//line = line.substr(0, -2);
 
 							if(eventsMap.find(line2) == eventsMap.end()) {
+								controlLine = controlLine.substr(1, 1);
+								int eventInt = 0;
+								if(controlLine == "1") {
+									// Controllable event
+									highest_even_event += 2;
+									eventInt = highest_even_event;
+								} else if(controlLine == "0") {
+									// Uncontrollable event
+									highest_odd_event += 2;
+									eventInt = highest_odd_event;
+								}
 								eventsMap[line2] = eventInt;
-								eventInt++;
 							}
 						}
 					}
@@ -363,24 +364,72 @@ void TDS::printADSsupervisor(string filePath, string rootFile) {
 	free(fileLinkedListHead);
 
 	// Testing, remove later:
-	fputs("\n", adsFile);
 	for(map<string, int>::iterator it = eventsMap.begin(); it != eventsMap.end(); ++it) {
 		fputs("*", adsFile);
 		fputs((it->first).c_str(), adsFile);
 		fputs("*", adsFile);
+		fprintf(adsFile, "%d", it->second);
 		fputs("\n", adsFile);
 		//fprintf(adsFile, "%d", it->second);
 		//fputs("\n", adsFile);
 	}
 	/******************/
 
+	vector<int> markerStates;
+	vector<string> transitionStatements;
+
 	// max index + 1 as max number of states, pass in the vectors of strings to pass through for each section then return
-	// printADSsupervisor_rec(P0, visitedStates, 0, numOfTransitions, maxIndex); // Make this return what you need
+	// printADSsupervisor_rec(P0, visitedStates, 0, numOfTransitions, maxIndex, eventsMap, markerStates, transitionStatements); // Make this return what you need
 	// File manipulation here
 	fclose(adsFile);
 }
 
-void TDS::printADSsupervisor_rec(bdd current, vector<bdd>& visitedStates, int currIndex, int& numOfTransitions, int maxIndex /*, stringMap, markerState*/) {
+void TDS::printADSsupervisor_rec(bdd current, vector<bdd>& visitedStates, int currIndex, int& numOfTransitions, int maxIndex, std::map<string, int> eventsMap, vector<int> markerStates, vector<string> transitionStatements) {
+    if(currIndex > maxIndex) maxIndex = currIndex; // Update max index
+    if ( (current & Pm) != bddfalse) markerStates.push_back(currIndex); // Update list of marker states
+
+    string tempTransition;
+    stringstream tempStringstream;
+    tempStringstream << currIndex;
+    tempTransition = tempStringstream.str();
+    tempStringstream.str("");
+    tempStringstream.clear();
+    tempTransition += " ";
+
+    for(auto& sigma:Sigma) {
+	    if((sigma.second->getFSigma() & current) != bddfalse) {
+		    bdd next = sigma.second->delta(current);
+		    if(next != bddfalse) {
+			    numOfTransitions++;
+
+			    tempStringstream << eventsMap[sigma.first];
+			    tempTransition += tempStringstream.str();
+			    tempStringstream.str("");
+			    tempStringstream.clear();
+			    tempTransition += " ";
+
+			    auto it = find_if(visitedStates.begin(), visitedStates.end(), [&](auto& P) {
+					    return P == next;
+			    });
+			    int nextIndex = distance(visitedStates.begin(), it);
+			    
+			    tempStringstream << nextIndex;
+			    tempTransition += tempStringstream.str();
+			    tempStringstream.str("");
+			    tempStringstream.clear();
+			    transitionStatements.push_back(tempTransition); // Update transition statements
+
+			    if(it == visitedStates.end()) {
+				    visitedStates.push_back(next);
+				    printADSsupervisor_rec(next, visitedStates, nextIndex, numOfTransitions, maxIndex, eventsMap, markerStates, transitionStatements);
+			    }
+		    }
+	    }
+    }
+
+
+
+	/*****************/
     /* cout << currIndex << ":"; fdd_printset(current);
     if ( (current & Pm) != bddfalse)
         cout << "*";
