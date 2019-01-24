@@ -234,7 +234,6 @@ void TDS::printADSsupervisor(string filePath, string rootFile) {
 	visitedStates.push_back(P0);
 	int numOfTransitions = 0;
 
-	int maxIndex = 0;
 	int highest_odd_event = -1;
 	int highest_even_event = -2;
 	map<string, int> eventsMap;
@@ -275,7 +274,7 @@ void TDS::printADSsupervisor(string filePath, string rootFile) {
 		abort();
 	}
 	fputs((rootFile + "_Supervisor").c_str(), adsFile);
-	fputs("\n", adsFile);
+	fputs("\n\n", adsFile);
 
 	// Finding states:
 	while(fileLinkedListHead != NULL) {
@@ -364,7 +363,7 @@ void TDS::printADSsupervisor(string filePath, string rootFile) {
 	free(fileLinkedListHead);
 
 	// Testing, remove later:
-	for(map<string, int>::iterator it = eventsMap.begin(); it != eventsMap.end(); ++it) {
+	/*for(map<string, int>::iterator it = eventsMap.begin(); it != eventsMap.end(); ++it) {
 		fputs("*", adsFile);
 		fputs((it->first).c_str(), adsFile);
 		fputs("*", adsFile);
@@ -372,29 +371,54 @@ void TDS::printADSsupervisor(string filePath, string rootFile) {
 		fputs("\n", adsFile);
 		//fprintf(adsFile, "%d", it->second);
 		//fputs("\n", adsFile);
-	}
+	}*/
 	/******************/
 
+	int maxIndex = 0;
 	vector<int> markerStates;
 	vector<string> transitionStatements;
+	int *maxIndexPtr;
+	vector<int> *markerStatesPtr;
+	vector<string> *transitionStatementsPtr;
+	maxIndexPtr = &maxIndex;
+	markerStatesPtr = &markerStates;
+	transitionStatementsPtr = &transitionStatements;
 
 	// max index + 1 as max number of states, pass in the vectors of strings to pass through for each section then return
-	// printADSsupervisor_rec(P0, visitedStates, 0, numOfTransitions, maxIndex, eventsMap, markerStates, transitionStatements); // Make this return what you need
-	// File manipulation here
+	printADSsupervisor_rec(P0, visitedStates, 0, numOfTransitions, eventsMap, maxIndexPtr, markerStatesPtr, transitionStatementsPtr); // Make this return what you need
+	// File manipulation:
+	fputs("State size (State set will be (0,1....,size-1)):\n", adsFile);
+	fprintf(adsFile, "%d", maxIndex + 1);
+
+	fputs("\n\nMarker states:", adsFile);
+	for(unsigned int j = 0; j < markerStates.size(); j++) {
+		fputs("\n", adsFile);
+		fprintf(adsFile, "%d", markerStates.at(j));
+	}
+
+	fputs("\n\nVocal states:\n", adsFile);
+	// <-- Enter vocal output states, one per line.
+	// Format: State  Vocal_Output.  Vocal_Output in range 10 to 99.
+	// Example: 0 10
+	// If no vocal states, leave line blank.
+	// End vocal list with blank line.
+
+	fputs("\n\nTransitions:", adsFile);
+	// <-- Enter transition triple, one per line.
+	// Format: Exit_(Source)_State  Transition_Label  Entrance_(Target)_State.
+	// Transition_Label in range 0 to 999.
+	// Example: 2 0 1 (for transition labeled 0 from state 2 to state 1).
+	for(unsigned int j = 0; j < transitionStatements.size(); j++) {
+		fputs("\n", adsFile);
+		fputs(transitionStatements.at(j).c_str(), adsFile);
+	}
+	
 	fclose(adsFile);
 }
 
-void TDS::printADSsupervisor_rec(bdd current, vector<bdd>& visitedStates, int currIndex, int& numOfTransitions, int maxIndex, std::map<string, int> eventsMap, vector<int> markerStates, vector<string> transitionStatements) {
-    if(currIndex > maxIndex) maxIndex = currIndex; // Update max index
-    if ( (current & Pm) != bddfalse) markerStates.push_back(currIndex); // Update list of marker states
-
-    string tempTransition;
-    stringstream tempStringstream;
-    tempStringstream << currIndex;
-    tempTransition = tempStringstream.str();
-    tempStringstream.str("");
-    tempStringstream.clear();
-    tempTransition += " ";
+void TDS::printADSsupervisor_rec(bdd current, vector<bdd>& visitedStates, int currIndex, int& numOfTransitions, std::map<string, int> eventsMap, int *maxIndexPtr, vector<int> *markerStatesPtr, vector<string> *transitionStatementsPtr) {
+    if(currIndex > *maxIndexPtr) *maxIndexPtr = currIndex; // Update max index
+    if ( (current & Pm) != bddfalse) markerStatesPtr->push_back(currIndex); // Update list of marker states
 
     for(auto& sigma:Sigma) {
 	    if((sigma.second->getFSigma() & current) != bddfalse) {
@@ -402,26 +426,31 @@ void TDS::printADSsupervisor_rec(bdd current, vector<bdd>& visitedStates, int cu
 		    if(next != bddfalse) {
 			    numOfTransitions++;
 
+			    string tempTransition = "";
+			    stringstream tempStringstream;
+			    tempStringstream << currIndex;
+			    tempTransition = tempStringstream.str();
+			    tempStringstream=stringstream();
+			    tempTransition += " ";
+
 			    tempStringstream << eventsMap[sigma.first];
 			    tempTransition += tempStringstream.str();
-			    tempStringstream.str("");
-			    tempStringstream.clear();
+			    tempStringstream=stringstream();
 			    tempTransition += " ";
 
 			    auto it = find_if(visitedStates.begin(), visitedStates.end(), [&](auto& P) {
 					    return P == next;
 			    });
 			    int nextIndex = distance(visitedStates.begin(), it);
-			    
+
 			    tempStringstream << nextIndex;
 			    tempTransition += tempStringstream.str();
-			    tempStringstream.str("");
-			    tempStringstream.clear();
-			    transitionStatements.push_back(tempTransition); // Update transition statements
+			    tempStringstream=stringstream();
+			    transitionStatementsPtr->push_back(tempTransition); // Update transition statements
 
 			    if(it == visitedStates.end()) {
 				    visitedStates.push_back(next);
-				    printADSsupervisor_rec(next, visitedStates, nextIndex, numOfTransitions, maxIndex, eventsMap, markerStates, transitionStatements);
+				    printADSsupervisor_rec(next, visitedStates, nextIndex, numOfTransitions, eventsMap, maxIndexPtr, markerStatesPtr, transitionStatementsPtr);
 			    }
 		    }
 	    }

@@ -39,7 +39,7 @@ public:
     void printControlData(string filePath);
     void printADSinputs(string filePath, string rootFile); // ADS
     void printADSsupervisor(string filePath, string rootFile); // ADS
-    void printADSsupervisor_rec(bdd current, vector<bdd>& visitedStates, int currIndex, int& numOfTransitions, int maxIndex, map<string, int> eventsMap, vector<int> markerStates, vector<string> transitionStatements); // ADS
+    void printADSsupervisor_rec(bdd current, vector<bdd>& visitedStates, int currIndex, int& numOfTransitions, map<string, int> eventsMap, int *maxIndexPtr, vector<int> *markerStatesPtr, vector<string> *transitionStatementsPtr); // ADS
 private:
     DESPtr root;
     unordered_map<string,ePtr> Sigma;
