@@ -273,7 +273,7 @@ void TDS::printADSsupervisor(string filePath, string rootFile) {
 		cerr << "Error: ADS file cannot be created!" << endl;
 		abort();
 	}
-	fputs((rootFile + "_Supervisor").c_str(), adsFile);
+	fputs((rootFile + " Supervisor").c_str(), adsFile);
 	fputs("\n\n", adsFile);
 
 	// Finding states:
@@ -408,10 +408,20 @@ void TDS::printADSsupervisor(string filePath, string rootFile) {
 	// Format: Exit_(Source)_State  Transition_Label  Entrance_(Target)_State.
 	// Transition_Label in range 0 to 999.
 	// Example: 2 0 1 (for transition labeled 0 from state 2 to state 1).
+	fputs("\n# Events reference:", adsFile);
+	for(map<string, int>::reverse_iterator it = eventsMap.rbegin(); it != eventsMap.rend(); ++it) {
+		fputs("\n# ", adsFile);
+		fprintf(adsFile, "%d", it->second);
+		fputs(": ", adsFile);
+		fputs((it->first).c_str(), adsFile);
+	}
+
+
 	for(unsigned int j = 0; j < transitionStatements.size(); j++) {
 		fputs("\n", adsFile);
 		fputs(transitionStatements.at(j).c_str(), adsFile);
 	}
+	fputs("\n", adsFile);
 	
 	fclose(adsFile);
 }

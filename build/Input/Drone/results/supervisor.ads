@@ -1,4 +1,4 @@
-DroneNetwork_Supervisor
+DroneNetwork Supervisor
 
 State size (State set will be (0,1....,size-1)):
 3376
@@ -10,6 +10,23 @@ Vocal states:
 
 
 Transitions:
+# Events reference:
+# 0: startDrone2MovingUp
+# 6: startDrone2MovingRight
+# 4: startDrone2MovingLeft
+# 2: startDrone2MovingDown
+# 8: startDrone1MovingUp
+# 14: startDrone1MovingRight
+# 12: startDrone1MovingLeft
+# 10: startDrone1MovingDown
+# 1: doneDrone2MovingUp
+# 3: doneDrone2MovingRight
+# 5: doneDrone2MovingLeft
+# 7: doneDrone2MovingDown
+# 9: doneDrone1MovingUp
+# 11: doneDrone1MovingRight
+# 13: doneDrone1MovingLeft
+# 15: doneDrone1MovingDown
 0 4 1
 1 5 2
 2 6 3
