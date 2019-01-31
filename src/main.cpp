@@ -8,7 +8,7 @@
 using namespace std;
 
 
-int main(int argc, char *argv[]){
+int main(/*int argc, char *argv[]*/){
 
     bdd_init(BDD_nodeNUM,BDD_cacheSize);
 
@@ -16,14 +16,23 @@ int main(int argc, char *argv[]){
     fdd_file_hook(printhandler);
 
 
-
+    /*
     if (argc != 3){
         cerr << "Error: invalid command line arguments!" << endl;
         abort;
     }
+    
     string filePath = argv[1];
     string rootFile = argv[2];
-    cout << "Welcome to DES version 1.0" << endl;
+    */
+    string filePath;
+    string rootFile;
+    cout << "Enter directory path containing input files ie: Input/Example" << endl;
+    cin >> filePath;
+    cout << "Enter the name of the root file ie: root" << endl;
+    cin >> rootFile;
+
+    cout << "Welcome to DES version 1.1" << endl;
 
     TDS temp(filePath, rootFile);
     temp.print();
