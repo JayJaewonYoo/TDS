@@ -9,5 +9,3 @@ file(GLOB SOURCES "src/*.cpp")
 
 add_executable(TDS ${SOURCES})
 TARGET_LINK_LIBRARIES(TDS /usr/local/lib/libbdd.so.0.0.0)
-
-

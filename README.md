@@ -10,3 +10,6 @@ Required tools:
  2. Run ./build.sh inputDirectory rootFileName
 
 This project is currently under development. More information to come...
+
+Interface requires libgtk-3-dev, can be installed using:
+"sudo apt-get install libgtk-3-dev"
